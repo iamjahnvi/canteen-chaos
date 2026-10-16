@@ -91,6 +91,12 @@ function applyCoupon(code, lines, coupons, { slot = null, now = new Date() } = {
     return { valid: false, discount: 0, reason: 'This coupon is fully used' };
   }
 
+  // FIX CC-08: expiry was never checked here (only the /api/coupons list filtered it),
+  // so FRESHERS24 (expired 2024-09-30) still gave a discount at quote/order time.
+  if (coupon.expiresAt && new Date(coupon.expiresAt) <= now) {
+    return { valid: false, discount: 0, reason: `${coupon.code} has expired` };
+  }
+
   const subtotal = sumLines(lines);
   if (subtotal < coupon.minOrder) {
     return {

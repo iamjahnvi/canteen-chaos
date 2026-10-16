@@ -3,7 +3,7 @@
 // and the little kitchen simulation that moves orders along on its own.
 
 const FLOW = ['placed', 'accepted', 'preparing', 'ready', 'picked'];
-const TERMINAL = ['ready', 'picked', 'cancelled', 'refunded'];
+const TERMINAL = ['picked', 'cancelled', 'refunded']; // FIX (extra): 'ready' is not terminal — food still has to be handed over. With 'ready' in here, allowedNext('ready') was [] so ready->picked was refused and ratings (picked-only) were unreachable.
 
 // how long each stage should take before the kitchen moves it on (seconds)
 const AUTO_AFTER = { placed: 20, accepted: 25, preparing: 60 };
