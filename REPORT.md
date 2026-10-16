@@ -522,15 +522,15 @@ const TERMINAL = ['picked', 'cancelled', 'refunded']; // FIX (extra): 'ready' is
 
 ## UI polish — "Recommended dropdown arrow too close to edge"
 
-**Reproduced:** Opened the menu view and looked at the sort `<select id="sortSelect">` ("Recommended"). The native dropdown arrow sat tight against the right edge of the pill (symmetric `9px 14px` padding), as in the screenshot.
+**Reproduced:** Opened the menu view and looked at the sort `<select id="sortSelect">` ("Recommended"). The dropdown arrow sat tight against the right edge of the pill, as in the screenshot.
 
-**Cause:** `.search, .select` in `frontend/style.css` share `padding: 9px 14px`. For a text input that is fine, but for a native `<select>` the arrow glyph renders inside the right padding, so 14px leaves it almost touching the edge with no breathing room.
+**Cause:** `.search, .select` in `frontend/style.css` share `padding: 9px 14px` and use the browser-native `<select>` arrow. First attempt (`padding-right: 28px` only) did nothing visible — Chrome/Edge draw the native arrow outside the padding box, so padding cannot shift it. The arrow position is not controllable until the native arrow is replaced.
 
-**Fix:** Kept the shared padding and added a right-padding override on `.select` only (`padding-right: 28px`), which pushes the native arrow left / inward without moving the label text. No custom arrow, no `appearance` change, so laptop/phone/tablet rendering stays native.
+**Fix:** Hid the native arrow (`appearance: none`) and drew our own chevron via `background-image` (inline SVG), positioned with `background-position: right 18px center`. 18px from the edge = a bit left of the native ~8-10px, without crowding the "Recommended" label. Separate SVG stroke colours per theme (`#2b2118` light / `#f2e8df` dark) so it stays readable; `padding: 9px 38px 9px 16px` reserves room for it. To move it further left/right, change only the `18px` value.
 
-**Checked:** Visual check of `#sortSelect` — arrow now sits ~14px further in from the edge, label "Recommended" position unchanged. No other `.search` input affected; `.select.small` untouched.
+**Checked:** `#sortSelect` now shows the chevron 18px in from the edge in both light and dark themes. Hard-refresh required (CSS cache). No other `.search` input affected; `.select.small` untouched.
 
-**Time:** about 5 minutes.
+**Time:** about 15 minutes, including finding out padding alone cannot move a native select arrow.
 
 **Code previous** (`frontend/style.css`):
 
@@ -541,7 +541,20 @@ const TERMINAL = ['picked', 'cancelled', 'refunded']; // FIX (extra): 'ready' is
 **Code new** (`frontend/style.css`):
 
 ```css
-.select { cursor: pointer; padding-right: 28px; }
+.select {
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 9px 38px 9px 16px;
+  background-color: var(--card);
+  background-image: url("data:image/svg+xml,...chevron #2b2118...");
+  background-repeat: no-repeat;
+  background-position: right 18px center;
+  background-size: 12px;
+}
+html[data-theme="dark"] .select {
+  background-image: url("data:image/svg+xml,...chevron #f2e8df...");
+}
 ```
 
 ---
