@@ -187,7 +187,7 @@ h1, h2, h3 { margin: 0; }
 }
 
 .search { flex: 1; min-width: 180px; }
-.select { cursor: pointer; }
+.select { cursor: pointer; padding-right: 28px; }
 
 .chips { display: flex; gap: 8px; flex-wrap: wrap; }
 
